@@ -15,3 +15,5 @@ George
         :target: http://dx.doi.org/10.5281/zenodo.11989
 
 Read the documentation at: `dan.iel.fm/george <http://dan.iel.fm/george>`_.
+
+This fork implements spectral mixture kernels at the C level with george (for spectral mixture kernels see http://arxiv.org/abs/1302.4245. Coded in collaboration with Felipe Rojas.
