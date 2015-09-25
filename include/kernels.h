@@ -443,6 +443,80 @@ private:
     double gamma_, period_;
 };
 
+// SM Kernel
+class SMKernel : public Kernel {
+public:
+    SMKernel (const unsigned int ndim, const unsigned int size)
+        : Kernel(ndim), size_(size) 
+    {
+    parameters_ = new double[size];
+    };
+    ~SMKernel () {
+        delete parameters_;
+    };
+
+    double value (const double* x1, const double* x2) const {
+        unsigned int j,ndim = this->get_ndim();
+        double dexp  = 0.0; //Factor de la pitatoria
+        double prod = 1.0; //Pitatoria
+        double argc  = 0.0; //Producto punto en el cos
+
+        // Pitatoria sobre j hasta ndim
+        for (j = 0; j < ndim; ++j) {
+            double diff = x1[j] - x2[j];
+            dexp  = exp(-2 * M_PI * M_PI * diff * diff * parameters_[ndim+j]);
+            //dexp  = exp(-2 * M_PI * M_PI * (x1 - x2) * (x1 - x2) * va);
+            prod = prod * dexp;
+            argc += diff * parameters_[j];
+        }
+        //printf("%f %f\n",x1[0]-x2[0], cos(2 * M_PI * argc) * prod);
+        return cos(2 * M_PI * argc) * prod;
+    };
+
+    void gradient (const double* x1, const double* x2, double* grad) const {
+        unsigned int j,ndim = this->get_ndim();
+        double dexp = 0.0;
+        double prod = 1.0;
+        double argc = 0.0;
+        double val_cos = 0.0;
+        double val_sin = 0.0;
+        for (j = 0; j < ndim; ++j) {
+            double diff = x1[j] - x2[j];
+            dexp  = exp(-2 * M_PI * M_PI * diff * diff * parameters_[ndim+j]);
+            //dexp  = exp(-2 * M_PI * M_PI * (x1 - x2) * (x1 - x2) * va);
+            prod = prod * dexp;
+            argc += diff * parameters_[j];
+        }
+        //printf("%f %f\n",x1[0]-x2[0], cos(2 * M_PI * argc) * prod);
+        val_cos = cos(2 * M_PI * argc) * prod;
+        val_sin = -sin(2 * M_PI * argc) * prod;
+        for (j = 0; j < ndim; ++j) {
+            double diff = x1[j] - x2[j];
+            grad[j] = val_sin * 2 * M_PI * diff;
+            grad[ndim+j] = val_cos * (-2) * M_PI * M_PI * diff * diff;
+        }
+    };
+    unsigned int size () const { return size_; }
+    void set_parameter (const unsigned int i, const double value) {
+        parameters_[i] = value;
+    };
+    double get_parameter (const unsigned int i) const {
+        return parameters_[i];
+    };
+
+    //unsigned int size () const { return 1; }
+    //void set_parameter (const unsigned int i, const double value) {
+    //
+    //};
+    //double get_parameter (const unsigned int i) const {
+    //
+    //}
+
+protected:
+    double* parameters_;
+    unsigned int size_;
+};
+
 }; // namespace kernels
 }; // namespace george
 

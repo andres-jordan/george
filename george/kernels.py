@@ -8,7 +8,7 @@ __all__ = [
     "RadialKernel", "ExpKernel", "ExpSquaredKernel",
     "CosineKernel", "ExpSine2Kernel",
     "Matern32Kernel", "Matern52Kernel",
-
+    "SMKernel",
     "PythonKernel",
 ]
 
@@ -17,7 +17,6 @@ from functools import partial
 
 from ._kernels import CythonKernel
 from .utils import numerical_gradient
-
 
 class Kernel(object):
     """
@@ -456,6 +455,21 @@ class ExpSine2Kernel(Kernel):
         super(ExpSine2Kernel, self).__init__(gamma, period, ndim=ndim)
         assert dim < self.ndim, "Invalid dimension"
         self.dim = dim
+
+class SMKernel(Kernel):
+    """
+    SM Kernel!
+    """
+
+    kernel_type = -3
+
+    #def __init__(self, we, mu, va, qdim, ndim=1):
+    #    super(SMKernel, self).__init__(we, mu, va, qdim, ndim)
+    def __init__(self, pars=(),ndim=1):
+        super(SMKernel,self).__init__(*pars, ndim=ndim)
+        self.size = len(self.pars)
+        assert self.size == 2*ndim, "Invalid parameter size"
+
 
 
 class PythonKernel(Kernel):

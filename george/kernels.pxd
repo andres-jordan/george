@@ -53,6 +53,10 @@ cdef extern from "kernels.h" namespace "george::kernels":
     cdef cppclass Product(Operator):
         Product(const unsigned int ndim, Kernel* k1, Kernel* k2)
 
+    # SM Kernel
+    cdef cppclass SMKernel(Kernel):
+        SMKernel(const unsigned int ndim, const unsigned int size)
+
     # Basic kernels.
     cdef cppclass ConstantKernel(Kernel):
         ConstantKernel(const unsigned int ndim)
@@ -90,7 +94,7 @@ cdef extern from "kernels.h" namespace "george::kernels":
 cdef inline double eval_python_kernel (const double* pars,
                                        const unsigned int size, void* meta,
                                        const double* x1, const double* x2,
-                                       const unsigned int ndim):
+                                       const unsigned int ndim) except *:
     # Build the arguments for calling the function.
     cdef np.npy_intp shape[1]
     shape[0] = <np.npy_intp>ndim
@@ -109,7 +113,7 @@ cdef inline void eval_python_kernel_grad (const double* pars,
                                           const unsigned int size,
                                           void* meta,
                                           const double* x1, const double* x2,
-                                          const unsigned int ndim, double* grad):
+                                          const unsigned int ndim, double* grad) except *:
     # Build the arguments for calling the function.
     cdef np.npy_intp shape[1]
     shape[0] = <np.npy_intp>ndim
@@ -157,8 +161,10 @@ cdef inline Kernel* parse_kernel(kernel_spec) except *:
     cdef Kernel* kernel
 
     if kernel_spec.kernel_type == -2:
-        kernel = new CustomKernel(ndim, kernel_spec.size, <void*>kernel_spec,
-                                  &eval_python_kernel, &eval_python_kernel_grad)
+        kernel = new CustomKernel(ndim, kernel_spec.size, <void*>kernel_spec, &eval_python_kernel, &eval_python_kernel_grad)
+    
+    if kernel_spec.kernel_type == -3:
+        kernel = new SMKernel(ndim, kernel_spec.size)
 
     elif kernel_spec.kernel_type == 0:
         kernel = new ConstantKernel(ndim)
