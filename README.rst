@@ -16,4 +16,15 @@ George
 
 Read the documentation at: `dan.iel.fm/george <http://dan.iel.fm/george>`_.
 
-This fork implements spectral mixture kernels at the C level with george (for spectral mixture kernels see http://arxiv.org/abs/1302.4245. Coded in collaboration with Felipe Rojas.
+This fork implements spectral mixture kernels at the C level with george (for spectral mixture kernels see http://arxiv.org/abs/1302.4245). Coded in collaboration with Felipe Rojas.
+
+An example of the usage of the kernel is as follows::
+
+	import george
+	from george import kernels
+
+	# An SM kernel models the spectral density with N gaussians
+	# This creates a one gaussian kernel with amplitude amp, mean mu and
+	# inverse variance v
+
+	kernel = amp * kernels.SMKernel((mu,v))
